@@ -5,3 +5,5 @@
 ## 作业内容
 
 - ex01: HelloWorld 程序
+  - 使用 print 输出 Hello World
+  - 使用 input 函数实现键盘输入并显示输出
