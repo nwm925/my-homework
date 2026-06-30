@@ -24,7 +24,7 @@ const int resolution = 8;        // 8位分辨率 (0-255)
 // =============================
 
 // ========== 触摸检测参数 ==========
-const int TOUCH_THRESHOLD = 20;
+const int TOUCH_THRESHOLD = 500;
 const unsigned long DEBOUNCE_MS = 150;
 // ==================================
 

@@ -66,7 +66,7 @@ void loop() {
 
   // 板载LED根据触摸状态亮灭 (辅助指示)
   int touchVal = touchRead(touchPin);
-  if (touchVal < 20) {
+  if (touchVal < 500) {
     digitalWrite(ledPin, HIGH);  // 触摸时LED亮
   } else {
     digitalWrite(ledPin, LOW);   // 未触摸时LED灭
@@ -278,7 +278,7 @@ void handleRoot() {
           let h = ((history[i] - minVal) / range) * 56 + 4;  // 4-60px
           bar.style.height = h + 'px';
           // 值越低 = 越接近 = 颜色越暖
-          let ratio = history[i] / 80;
+          let ratio = history[i] / 1500;
           if (ratio < 0.25) bar.style.background = '#f33';
           else if (ratio < 0.5) bar.style.background = '#fa0';
           else bar.style.background = '#0af';
@@ -305,12 +305,12 @@ void handleRoot() {
       valueEl.className = 'value';
       progressBar.className = 'progress-bar';
 
-      if (touchValue < 15) {
+      if (touchValue < 200) {
         valueEl.classList.add('touch');
         progressBar.classList.add('touch');
         stateText.textContent = '🔴 已触摸 (Touched)';
         stateText.style.color = '#f33';
-      } else if (touchValue < 30) {
+      } else if (touchValue < 600) {
         valueEl.classList.add('near');
         progressBar.classList.add('near');
         stateText.textContent = '🟡 手指靠近 (Near)';
@@ -321,7 +321,7 @@ void handleRoot() {
       }
 
       // 进度条 (归一化: 假设范围 0-80, 触摸值越小进度越满)
-      let normalized = Math.max(0, Math.min(100, ((80 - touchValue) / 80) * 100));
+      let normalized = Math.max(0, Math.min(100, ((1500 - touchValue) / 1500) * 100));
       progressBar.style.width = normalized + '%';
 
       // 更新时间
