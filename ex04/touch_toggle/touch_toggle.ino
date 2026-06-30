@@ -1,13 +1,13 @@
-// 作业4 (ex04): 触摸传感器"自锁"开关 [调试版]
+// 作业4 (ex04): 触摸传感器"自锁"开关 [调试版 v2]
 //
-// 先运行此版本来观察触摸值的范围，
-// 根据串口输出的值调整 TOUCH_THRESHOLD
+// 引脚: D4 (GPIO4) = T0 (触摸传感器)
+//       D2 (GPIO2) = 板载LED
 
-const int ledPin = 2;
-const int touchPin = T0;      // GPIO 4
+const int ledPin = 2;        // 板载LED = GPIO2 = D2
+const int touchPin = T0;     // 触摸引脚 = GPIO4 = D4
 
 // ========== 可调参数 ==========
-const int TOUCH_THRESHOLD = 35;    // ← 先改成35试试! 如果还不亮继续改大
+const int TOUCH_THRESHOLD = 35;    // 触摸阈值, 根据串口输出调整
 const unsigned long DEBOUNCE_MS = 150;
 // =============================
 
@@ -16,35 +16,45 @@ bool lastTouchState = false;
 unsigned long lastDebounceTime = 0;
 
 void setup() {
-  Serial.begin(115200);
+  // ★ 先用LED闪烁3次, 确认程序已烧录成功
   pinMode(ledPin, OUTPUT);
-  digitalWrite(ledPin, LOW);
+  for (int i = 0; i < 3; i++) {
+    digitalWrite(ledPin, HIGH);
+    delay(200);
+    digitalWrite(ledPin, LOW);
+    delay(200);
+  }
 
-  // 启动时先读一次看看初始值
+  Serial.begin(115200);
+  // 等串口准备好
+  delay(500);
+
   int initVal = touchRead(touchPin);
+  Serial.println();
   Serial.println("==========================================");
-  Serial.println("ex04: 触摸传感器自锁开关 (调试版)");
-  Serial.print("未触摸时的基准值: ");
+  Serial.println("ex04: 触摸传感器自锁开关 (调试版 v2)");
+  Serial.print("触摸引脚: GPIO");
+  Serial.print(touchPin);
+  Serial.print(" (D4), 初始值: ");
   Serial.println(initVal);
   Serial.print("当前阈值: ");
   Serial.println(TOUCH_THRESHOLD);
-  Serial.println("如果无法触发，修改 TOUCH_THRESHOLD");
-  Serial.println("规则: 阈值应该 > 触摸时的值 且 < 未触摸时的值");
+  Serial.println("规则: 摸线时数值应 < 阈值 → 触发");
+  Serial.println("      不摸时数值应 > 阈值 → 不触发");
   Serial.println("==========================================");
 }
 
 void loop() {
   int touchValue = touchRead(touchPin);
 
-  // ★ 始终打印触摸值，观察范围 (找到合适的阈值后可以注释掉)
-  Serial.print("Touch值: ");
+  // 始终打印, 方便观察范围
+  Serial.print("Touch: ");
   Serial.print(touchValue);
-  Serial.print("  状态: ");
-  Serial.println(touchValue < TOUCH_THRESHOLD ? "● 触摸中" : "○ 未触摸");
+  Serial.print("  ");
+  Serial.println(touchValue < TOUCH_THRESHOLD ? "● 摸到了" : "○ 没摸");
 
   bool currentTouchState = (touchValue < TOUCH_THRESHOLD);
 
-  // 防抖
   if (currentTouchState != lastTouchState) {
     lastDebounceTime = millis();
   }
@@ -58,11 +68,11 @@ void loop() {
         ledState = !ledState;
         digitalWrite(ledPin, ledState ? HIGH : LOW);
         Serial.print(">>> [触发!] LED → ");
-        Serial.println(ledState ? "亮" : "灭");
+        Serial.println(ledState ? "亮 ON" : "灭 OFF");
       }
     }
   }
 
   lastTouchState = currentTouchState;
-  delay(80);  // 调试时放慢一点方便观察
+  delay(80);
 }
