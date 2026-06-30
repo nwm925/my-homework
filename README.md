@@ -31,3 +31,41 @@
 - `sos_millis.ino`: 使用 `millis()` + 状态机实现 SOS 摩尔斯电码
 - `sos_configurable.ino`: 可配置参数版本 (枚举状态机)
 - `sos_interactive.ino`: 交互式版本 (串口命令控制启停/速度)
+
+### ex04 - 作业4: 触摸传感器"自锁"开关
+- `touch_toggle.ino`: 基于触摸传感器的自锁开关
+- 使用布尔状态变量 `ledState` + 边缘检测逻辑
+- 检测触摸按下瞬间翻转LED状态 (摸一下亮, 再摸一下灭)
+- 软件防抖 (millis) 防止手抖误触发
+
+### ex05 - 作业5: 多档位触摸调速呼吸灯
+- `breathing_speed.ino`: 触摸切换速度档位的呼吸灯
+- 3个速度级别 (慢/中/快), 每次触摸循环切换 (1→2→3→1)
+- PWM呼吸灯根据档位改变 `delay()` 时长
+- 结合触摸自锁开关逻辑和PWM呼吸灯代码
+
+### ex06 - 作业6: 警车双闪灯效 (双通道PWM)
+- `police_double_flash.ino`: 双LED反相呼吸闪烁
+- 两个独立PWM通道 (LED A: GPIO 2, LED B: GPIO 5)
+- 反相关系: dutyA + dutyB = 255 (A变亮时B变暗)
+- 平滑交替渐变, 类似警车灯效
+
+### ex07 - 作业7: Web网页端无极调光器
+- `web_dimmer.ino`: WiFi + Web服务器 + HTML滑动条
+- HTML `<input type="range">` 滑动条 (0-255)
+- JavaScript `fetch()` 发送GET请求实时调节PWM
+- WiFi AP模式 (热点: ESP32-Dimmer), 手机/电脑浏览器访问
+
+### ex08 - 作业8: 物联网安防报警器
+- `iot_alarm.ino`: Web远程布防/撤防 + 触摸触发报警
+- 状态机: DISARMED → ARMED → ALARM
+- 网页端"布防"/"撤防"按钮控制
+- 布防状态下触摸引脚触发LED高频闪烁报警
+- 仅网页端撤防可解除报警
+
+### ex09 - 作业9: 实时传感器Web仪表盘
+- `sensor_dashboard.ino`: 触摸传感器数据实时Web监控
+- RESTful API: `GET /api/touch` 返回触摸模拟量JSON
+- Web页面AJAX定时拉取 (300ms间隔)
+- 实时数值显示 + 进度条 + 历史趋势柱状图
+- 手指靠近时数值实时变化、颜色渐变提示
