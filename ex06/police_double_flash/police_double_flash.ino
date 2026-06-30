@@ -1,85 +1,51 @@
 // 作业6 (ex06): 警车双闪灯效 (双通道PWM)
 //
-// 功能说明:
-//   两个LED灯呈现平滑交替的渐变闪烁效果 —
-//   当灯A的亮度逐渐增加时, 灯B的亮度同步逐渐减小,
-//   形成一个变亮、另一个变暗的"反相"呼吸效果,
-//   类似警车双闪灯。
+// 两个LED呈现反相呼吸效果:
+//   LED A变亮时LED B变暗, LED A变暗时LED B变亮
+//   类似警车双闪灯
 //
-// 关键技术:
-//   - 双通道独立PWM
-//   - 反相占空比: dutyA + dutyB = 255 (互补)
-//   - 使用 ledcSetup + ledcAttachPin 建立两个独立PWM通道
-//
-// 硬件连接:
-//   - LED A: GPIO 2 (板载LED, PWM通道0)
-//   - LED B: GPIO 5 (面包板外接LED, 串联220Ω限流电阻, PWM通道1)
-//
-// 面包板接线:
-//   GPIO 5 → 220Ω电阻 → LED正极(长脚) → LED负极(短脚) → GND
+// 使用 ledcAttach() 简化API (兼容各版本ESP32板包)
 
-const int ledPinA = 2;   // LED A (PWM通道0)
-const int ledPinB = 5;   // LED B (PWM通道1)
+const int ledPinA = 2;   // LED A (板载)
+const int ledPinB = 5;   // LED B (面包板外接)
 
-// ========== PWM参数 ==========
-const int freq = 5000;           // PWM频率 5000Hz
-const int resolution = 8;        // 8位分辨率 (0-255)
-const int maxDuty = 255;         // 最大占空比
-
-// PWM通道号
-const int pwmChannelA = 0;
-const int pwmChannelB = 1;
-// =============================
+const int freq = 5000;
+const int resolution = 8;
+const int maxDuty = 255;
 
 void setup() {
   Serial.begin(115200);
 
-  // 配置两个独立的PWM通道
-  ledcSetup(pwmChannelA, freq, resolution);
-  ledcAttachPin(ledPinA, pwmChannelA);
-
-  ledcSetup(pwmChannelB, freq, resolution);
-  ledcAttachPin(ledPinB, pwmChannelB);
+  // 简化API: ledcAttach自动分配通道, 返回通道号
+  int chA = ledcAttach(ledPinA, freq, resolution);
+  int chB = ledcAttach(ledPinB, freq, resolution);
 
   Serial.println("==========================================");
-  Serial.println("ex06: 警车双闪灯效 (双通道反相PWM)");
-  Serial.print("LED A: GPIO "); Serial.print(ledPinA);
-  Serial.print(" (通道"); Serial.print(pwmChannelA); Serial.println(")");
-  Serial.print("LED B: GPIO "); Serial.print(ledPinB);
-  Serial.print(" (通道"); Serial.print(pwmChannelB); Serial.println(")");
-  Serial.println("A变亮时B变暗, A变暗时B变亮 (反相)");
+  Serial.println("ex06: 警车双闪灯效");
+  Serial.print("LED A: GPIO"); Serial.print(ledPinA);
+  Serial.print(" (通道"); Serial.print(chA); Serial.println(")");
+  Serial.print("LED B: GPIO"); Serial.print(ledPinB);
+  Serial.print(" (通道"); Serial.print(chB); Serial.println(")");
+  Serial.println("反相: A亮→B暗, A暗→B亮");
   Serial.println("==========================================");
 }
 
 void loop() {
-  // ===== 警车双闪: 两个LED反相呼吸 =====
-  //
-  // 阶段1: A从暗→亮, B从亮→暗 (互补关系)
-  //   dutyA: 0 → 255
-  //   dutyB: 255 → 0
-  //   dutyA + dutyB = 255 (始终互补)
-
-  // A逐渐变亮, B逐渐变暗
+  // 阶段1: A 0→255, B 255→0
   for (int dutyA = 0; dutyA <= maxDuty; dutyA++) {
-    int dutyB = maxDuty - dutyA;  // 反相: A+B=255
-
-    ledcWrite(pwmChannelA, dutyA);
-    ledcWrite(pwmChannelB, dutyB);
+    int dutyB = maxDuty - dutyA;
+    ledcWrite(ledPinA, dutyA);
+    ledcWrite(ledPinB, dutyB);
     delay(10);
   }
 
-  // 阶段2: A从亮→暗, B从暗→亮
-  //   dutyA: 255 → 0
-  //   dutyB: 0 → 255
-
-  // A逐渐变暗, B逐渐变亮
+  // 阶段2: A 255→0, B 0→255
   for (int dutyA = maxDuty; dutyA >= 0; dutyA--) {
-    int dutyB = maxDuty - dutyA;  // 反相: A+B=255
-
-    ledcWrite(pwmChannelA, dutyA);
-    ledcWrite(pwmChannelB, dutyB);
+    int dutyB = maxDuty - dutyA;
+    ledcWrite(ledPinA, dutyA);
+    ledcWrite(ledPinB, dutyB);
     delay(10);
   }
 
-  Serial.println("Police double-flash cycle completed");
+  Serial.println("Cycle completed");
 }
