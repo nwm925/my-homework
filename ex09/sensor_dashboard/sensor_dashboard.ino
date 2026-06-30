@@ -23,7 +23,7 @@
 
 #include <WiFi.h>
 #include <WebServer.h>
-#include <ArduinoJson.h>
+// 无需额外库, 用字符串拼接构建JSON
 
 const int ledPin = 2;
 const int touchPin = T0;
@@ -363,15 +363,10 @@ void handleRoot() {
 void handleApiTouch() {
   int touchValue = touchRead(touchPin);
 
-  // 使用ArduinoJson构建JSON响应
-  StaticJsonDocument<128> doc;
-  doc["touch"] = touchValue;
-  doc["time"] = millis();
+  // 直接用字符串拼接构建JSON (无需ArduinoJson库)
+  String jsonStr = "{\"touch\":" + String(touchValue) + ",\"time\":" + String(millis()) + "}";
 
-  String jsonStr;
-  serializeJson(doc, jsonStr);
-
-  // 添加CORS头, 允许跨域访问 (便于开发调试)
+  // 添加CORS头, 允许跨域访问
   server.sendHeader("Access-Control-Allow-Origin", "*");
   server.send(200, "application/json", jsonStr);
 
