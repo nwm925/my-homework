@@ -7,7 +7,7 @@ const int ledPin = 2;        // 板载LED = GPIO2 = D2
 const int touchPin = T0;     // 触摸引脚 = GPIO4 = D4
 
 // ========== 可调参数 ==========
-const int TOUCH_THRESHOLD = 35;    // 触摸阈值, 根据串口输出调整
+const int TOUCH_THRESHOLD = 500;   // 触摸阈值: 100(摸到) < 500 < 1200(没摸)
 const unsigned long DEBOUNCE_MS = 150;
 // =============================
 
