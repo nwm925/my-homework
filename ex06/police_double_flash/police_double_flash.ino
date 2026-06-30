@@ -1,13 +1,14 @@
 // 作业6 (ex06): 警车双闪灯效 (双通道PWM)
 //
-// 两个LED呈现反相呼吸效果:
-//   LED A变亮时LED B变暗, LED A变暗时LED B变亮
-//   类似警车双闪灯
+// ★ 无电阻版本: 板载LED显示通道A, 串口绘图器显示双通道波形
+//   打开 Arduino IDE → 工具 → 串口绘图器 (波特率115200)
+//   可以看到红蓝两条反相正弦波曲线
 //
-// 使用 ledcAttach() 简化API (兼容各版本ESP32板包)
+// ★ 加分项: 有220Ω电阻后, 在GPIO5接第二个LED即可看到实物双闪
+//   接线: GPIO5 → 220Ω → LED(+) → LED(-) → GND
 
-const int ledPinA = 2;   // LED A (板载)
-const int ledPinB = 5;   // LED B (面包板外接)
+const int ledPinA = 2;   // LED A (板载, 无需接线)
+const int ledPinB = 5;   // LED B (需要220Ω电阻+LED, 暂时留空)
 
 const int freq = 5000;
 const int resolution = 8;
@@ -16,18 +17,18 @@ const int maxDuty = 255;
 void setup() {
   Serial.begin(115200);
 
-  // 简化API: ledcAttach自动分配通道, 返回通道号
-  int chA = ledcAttach(ledPinA, freq, resolution);
-  int chB = ledcAttach(ledPinB, freq, resolution);
+  // 两路PWM
+  ledcAttach(ledPinA, freq, resolution);
+  ledcAttach(ledPinB, freq, resolution);
 
   Serial.println("==========================================");
   Serial.println("ex06: 警车双闪灯效");
-  Serial.print("LED A: GPIO"); Serial.print(ledPinA);
-  Serial.print(" (通道"); Serial.print(chA); Serial.println(")");
-  Serial.print("LED B: GPIO"); Serial.print(ledPinB);
-  Serial.print(" (通道"); Serial.print(chB); Serial.println(")");
-  Serial.println("反相: A亮→B暗, A暗→B亮");
+  Serial.println("打开串口绘图器查看双通道波形!");
+  Serial.println("板载LED显示通道A, 通道B需外接LED+电阻");
   Serial.println("==========================================");
+
+  // 串口绘图器用: 打印表头标签
+  Serial.println("dutyA,dutyB");
 }
 
 void loop() {
@@ -36,6 +37,12 @@ void loop() {
     int dutyB = maxDuty - dutyA;
     ledcWrite(ledPinA, dutyA);
     ledcWrite(ledPinB, dutyB);
+
+    // 串口绘图器输出 (两条曲线: 反相)
+    Serial.print(dutyA);
+    Serial.print(",");
+    Serial.println(dutyB);
+
     delay(10);
   }
 
@@ -44,8 +51,11 @@ void loop() {
     int dutyB = maxDuty - dutyA;
     ledcWrite(ledPinA, dutyA);
     ledcWrite(ledPinB, dutyB);
+
+    Serial.print(dutyA);
+    Serial.print(",");
+    Serial.println(dutyB);
+
     delay(10);
   }
-
-  Serial.println("Cycle completed");
 }
